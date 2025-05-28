@@ -9,7 +9,18 @@ class NotificationService {
     await _notifications.initialize(settings);
   }
 
+  static Future<void> requestPermission() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        _notifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+
+    await androidImplementation?.requestNotificationsPermission();
+  }
+
   static Future show(String title, String body) async {
+    
     const androidDetails = AndroidNotificationDetails(
       'channelId',
       'FireAlert',

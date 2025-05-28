@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:fire_prevent_system/models/control_data.dart';
 import 'package:fire_prevent_system/models/sensor_data.dart';
 import 'package:fire_prevent_system/services/firebase_service.dart';
@@ -17,6 +19,12 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _fanStatus = false;
   bool _pumpStatus = false;
   bool _doorStatus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.requestPermission();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +115,15 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _checkForAlerts(SensorData data) {
-    if (data.fire) {
-      NotificationService.show('🔥 Fire Alert', 'Fire has been detected!');
-    } else if (data.gas) {
-      NotificationService.show('💨 Gas Leak', 'Gas leak detected!');
+    try {
+      if (data.fire) {
+        log('Fire detected: ${data.fire}');
+        NotificationService.show('🔥 Fire Alert', 'Fire has been detected!');
+      } else if (data.gas) {
+        NotificationService.show('💨 Gas Leak', 'Gas leak detected!');
+      }
+    } catch (e) {
+      log('Error checking for alerts: $e');
     }
   }
 }

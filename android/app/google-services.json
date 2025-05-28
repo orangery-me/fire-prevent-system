@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "586711777970",
+    "project_id": "fire-prevent-system",
+    "storage_bucket": "fire-prevent-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586711777970:android:3bdc9ca9b9647de2c97fab",
+        "android_client_info": {
+          "package_name": "com.example.fire_prevent_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWofkG-GC-mAfsEWymQfjL4JVpMVReZ2A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:fire_prevent_system/models/temperature_point.dart';
 import 'package:fire_prevent_system/services/firebase_service.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -15,12 +13,9 @@ class RealtimeTemperatureChart extends StatelessWidget {
       stream: service.temperatureStream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: Text('Loading temperature chart...'));
-        }
-        final points = snapshot.data!;
-        if (points.isEmpty) {
           return Center(child: Text('No temperature data today.'));
         }
+        final points = snapshot.data!;
 
         final spots =
             points
@@ -42,8 +37,11 @@ class RealtimeTemperatureChart extends StatelessWidget {
             LineChartData(
               gridData: FlGridData(show: true),
               titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
                 ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
@@ -61,13 +59,13 @@ class RealtimeTemperatureChart extends StatelessWidget {
                   ),
                 ),
               ),
+              minY: 0,
               borderData: FlBorderData(show: true),
               lineBarsData: [
                 LineChartBarData(
                   spots: spots,
                   isCurved: true,
                   barWidth: 3,
-                  // colorStops: [0.0, 0.5, 1.0],
                   gradient: LinearGradient(colors: colors),
                   belowBarData: BarAreaData(show: false),
                   dotData: FlDotData(show: true),

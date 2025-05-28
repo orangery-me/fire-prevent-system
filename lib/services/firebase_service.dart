@@ -33,25 +33,25 @@ class FirebaseService {
         .limitToLast(10)
         .onValue
         .map((event) {
-      final raw = event.snapshot.value;
-      if (raw == null) return [];
+          final raw = event.snapshot.value;
+          if (raw == null) return [];
 
-      final Map<String, dynamic> map = Map<String, dynamic>.from(
-        raw as Map,
-      );
+          final Map<String, dynamic> map = Map<String, dynamic>.from(
+            raw as Map,
+          );
 
-      return map.entries.map((e) {
-        final rawKey = e.key.replaceAll('_', ':');
-        log('Raw key: $rawKey');
-        final time = DateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(rawKey);
-        final data = Map<String, dynamic>.from(e.value);
-        return TemperaturePoint(
-          time: time,
-          value: data['temperature']?.toDouble() ?? 0,
-        );
-      }).toList()
-        ..sort((a, b) => a.time.compareTo(b.time));
-    });
+          return map.entries.map((e) {
+              final rawKey = e.key.replaceAll('_', ':');
+              log('Raw key: $rawKey');
+              final time = DateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(rawKey);
+              final data = Map<String, dynamic>.from(e.value);
+              return TemperaturePoint(
+                time: time,
+                value: data['temperature']?.toDouble() ?? 0,
+              );
+            }).toList()
+            ..sort((a, b) => a.time.compareTo(b.time));
+        });
   }
 
   String _todayStart() {

@@ -43,7 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text('Fire Prevent System')),
+      appBar: AppBar(title: Text('Fire Prevent System', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold , fontSize: 25),), backgroundColor: Colors.blue.shade100,),
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -66,66 +66,55 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildDashboardContent() {
-    return Column(
-      children: [
-        StreamBuilder<SensorData>(
-          stream: _firebase.sensorStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final data = snapshot.data!;
+    return StreamBuilder<SensorData>(
+      stream: _firebase.sensorStream,
+      builder: (context, sensorSnapshot) {
+        return StreamBuilder<ControlData>(
+          stream: _firebase.controlStream,
+          builder: (context, controlSnapshot) {
+            if (sensorSnapshot.connectionState == ConnectionState.waiting ||
+                controlSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (sensorSnapshot.hasError || controlSnapshot.hasError) {
+              return Center(child: Text('Có lỗi khi lấy dữ liệu'));
+            }
+
+            if (sensorSnapshot.hasData && controlSnapshot.hasData) {
+              final data = sensorSnapshot.data!;
+              final control = controlSnapshot.data!;
               _checkForAlerts(data);
+              _fanStatus = control.fan;
+              _pumpStatus = control.pump;
+              _doorStatus = control.door;
+
               return Column(
                 children: [
                   _buildCard('🔥 Fire Detected', data.fire),
                   _buildCard('💨 Gas Leak', data.gas),
                   _buildCard('🌡 Temperature: ${data.temperature}°C', false),
+                  _buildSwitch('Pump (Water)', _pumpStatus, (val) {
+                    _firebase.controlDevice('pump', val);
+                  }),
+                  _buildSwitch('Fan', _fanStatus, (val) {
+                    _firebase.controlDevice('fan', val);
+                  }),
+                  _buildSwitch('Door', _doorStatus, (val) {
+                    _firebase.controlDevice('door', val);
+                  }),
+                  Expanded(child: RealtimeTemperatureChart(service: _firebase)),
                 ],
               );
-            } else {
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              return Center(child: Text('There is no data available'));
             }
+
+            return Center(child: Text('Không có dữ liệu'));
           },
-        ),
-        StreamBuilder<ControlData>(
-          stream: _firebase.controlStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasData) {
-              final controlData = snapshot.data!;
-              _pumpStatus = controlData.pump;
-              _fanStatus = controlData.fan;
-              _doorStatus = controlData.door;
-            }
-            return Column(
-              children: [
-                _buildSwitch('Pump (Water)', _pumpStatus, (val) {
-                  _firebase.controlDevice('pump', val);
-                }),
-                _buildSwitch('Fan', _fanStatus, (val) {
-                  _firebase.controlDevice('fan', val);
-                }),
-                _buildSwitch('Door', _doorStatus, (val) {
-                  _firebase.controlDevice('door', val);
-                }),
-              ],
-            );
-          },
-        ),
-        Expanded(child: RealtimeTemperatureChart(service: _firebase)),
-      ],
+        );
+      },
     );
   }
+
 
   Widget _buildCard(String title, bool active) {
     return Card(

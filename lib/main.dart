@@ -11,16 +11,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-// void main() {
-//   final raw = '2025-05-28T21_47_43';
-//   try {
-//     final time = DateFormat("yyyy-MM-dd'T'HH_mm_ss").parse(raw);
-//     print('✅ Parsed successfully: $time');
-//   } catch (e) {
-//     print('❌ Error: $e');
-//   }
-// }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override

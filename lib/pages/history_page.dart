@@ -24,6 +24,7 @@ class _HistoryPageState extends State<HistoryPage> {
   void initState() {
     super.initState();
     _load7DaysData();
+    _loadHourlyData(DateTime.now());
   }
 
   Future<void> _load7DaysData() async {
@@ -56,10 +57,8 @@ class _HistoryPageState extends State<HistoryPage> {
       _selectedDate = date;
     });
 
-    // Lấy dữ liệu trung bình theo block 4 tiếng
     final fetchedData = await _firebase.get4HourAverages(date);
 
-    // Đảm bảo thứ tự và đầy đủ 6 khung giờ 4 tiếng
     final fixedOrderKeys = [
       "00-04", "04-08", "08-12", "12-16", "16-20", "20-24"
     ];
@@ -150,7 +149,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     x: index,
                     barRods: [
                       BarChartRodData(
-                          toY: temp, color: Colors.blue, width: barWidth),
+                          toY: temp, color: Colors.orange, width: barWidth),
                     ],
                   );
                 }).toList(),
@@ -298,49 +297,58 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lịch sử nhiệt độ'),
-          actions: [
-            if (_selectedDate == null)
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
-                onPressed: _pickDate,
-                child: Text('Xem lịch sử'),
-              )
-            else
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
-                onPressed: _load7DaysData,
-                child: Text('Quay lại'),
-              )
-          ],
+        title: Text(
+          'Lịch sử nhiệt độ',
+          style: TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+              fontSize: 20
+          ),
+        ),
+        backgroundColor: Colors.blue.shade100,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0), // Clề phải
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              onPressed: _pickDate,
+              child: Text('Xem lịch sử'),
+            ),
+          ),
+        ],
       ),
+
       body: _loading
           ? Center(child: CircularProgressIndicator())
-          : Padding(
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(12.0),
-        child: _selectedDate == null
-            ? _build7DaysChart()
-            : Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Nhiệt độ trung bình ngày ${_selectedDate!.toLocal().toString().split(' ')[0]}',
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+              'Nhiệt độ trung bình 7 ngày qua',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
-            Expanded(child: _buildHourlyChart()),
+            SizedBox(height: 12),
+            SizedBox(height: 300, child: _build7DaysChart()),
+
+            SizedBox(height: 24),
+            if (_selectedDate != null) ...[
+              Text(
+                'Nhiệt độ trung bình theo khung giờ ngày ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 12),
+              SizedBox(height: 300, child: _buildHourlyChart()),
+            ]
           ],
         ),
       ),
+
     );
   }
 }

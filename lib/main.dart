@@ -2,7 +2,6 @@ import 'package:fire_prevent_system/pages/dashboard_page.dart';
 import 'package:fire_prevent_system/services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

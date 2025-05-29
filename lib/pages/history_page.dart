@@ -50,6 +50,7 @@ class _HistoryPageState extends State<HistoryPage> {
       _loading = false;
     });
   }
+
   Future<void> _loadHourlyData(DateTime date) async {
     setState(() {
       _loading = true;
@@ -60,16 +61,25 @@ class _HistoryPageState extends State<HistoryPage> {
     final fetchedData = await _firebase.get4HourAverages(date);
 
     final fixedOrderKeys = [
-      "00-04", "04-08", "08-12", "12-16", "16-20", "20-24"
+      "00-04",
+      "04-08",
+      "08-12",
+      "12-16",
+      "16-20",
+      "20-24",
     ];
 
     Map<String, double> filledHourlyData = {};
     for (var key in fixedOrderKeys) {
       filledHourlyData[key] = fetchedData[key] ?? 0.0;
-      log("[$date | $key]: ${fetchedData[key] != null ? '${fetchedData[key]} °C' : 'Không có dữ liệu'}");
+      log(
+        "[$date | $key]: ${fetchedData[key] != null ? '${fetchedData[key]} °C' : 'Không có dữ liệu'}",
+      );
     }
 
-    log("Dữ liệu 4 tiếng trung bình của ngày ${DateFormat('yyyy-MM-dd').format(date)}:");
+    log(
+      "Dữ liệu 4 tiếng trung bình của ngày ${DateFormat('yyyy-MM-dd').format(date)}:",
+    );
     filledHourlyData.forEach((key, value) {
       log("$key: ${value.toStringAsFixed(2)} °C");
     });
@@ -81,7 +91,6 @@ class _HistoryPageState extends State<HistoryPage> {
 
     log("đã chạy xong hàm loadHourlyData");
   }
-
 
   Future<void> _pickDate() async {
     DateTime now = DateTime.now();
@@ -101,12 +110,12 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 
-
   Widget _build7DaysChart() {
     final barWidth = 16.0;
-    final maxTemp = (_averages7Days.values.isEmpty)
-        ? 0
-        : _averages7Days.values.reduce((a, b) => a > b ? a : b);
+    final maxTemp =
+        (_averages7Days.values.isEmpty)
+            ? 0
+            : _averages7Days.values.reduce((a, b) => a > b ? a : b);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -121,8 +130,9 @@ class _HistoryPageState extends State<HistoryPage> {
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
-                        if (index < 0 || index >= _averages7Days.length)
+                        if (index < 0 || index >= _averages7Days.length) {
                           return SizedBox();
+                        }
                         return Text(
                           _averages7Days.keys.elementAt(index).substring(5),
                           style: TextStyle(fontSize: 10),
@@ -134,25 +144,29 @@ class _HistoryPageState extends State<HistoryPage> {
                     sideTitles: SideTitles(showTitles: false),
                   ),
                   topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
-                barGroups: _averages7Days.entries
-                    .toList()
-                    .asMap()
-                    .entries
-                    .map((entry) {
-                  final index = entry.key;
-                  final temp = entry.value.value;
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                          toY: temp, color: Colors.orange, width: barWidth),
-                    ],
-                  );
-                }).toList(),
+                barGroups:
+                    _averages7Days.entries.toList().asMap().entries.map((
+                      entry,
+                    ) {
+                      final index = entry.key;
+                      final temp = entry.value.value;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: temp,
+                            color: Colors.orange,
+                            width: barWidth,
+                          ),
+                        ],
+                      );
+                    }).toList(),
                 gridData: FlGridData(show: true),
                 borderData: FlBorderData(show: false),
               ),
@@ -160,35 +174,39 @@ class _HistoryPageState extends State<HistoryPage> {
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 20),
-                child: LayoutBuilder(builder: (context, constraints) {
-                  final barCount = _averages7Days.length;
-                  final spacePerBar = constraints.maxWidth / barCount;
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final barCount = _averages7Days.length;
+                    final spacePerBar = constraints.maxWidth / barCount;
 
-                  return Row(
-                    children: _averages7Days.entries.map((entry) {
-                      final index =
-                      _averages7Days.keys.toList().indexOf(entry.key);
-                      final temp = entry.value;
-                      final yPos = (1 - temp / (maxTemp + 5)) *
-                          (constraints.maxHeight - 20);
-                      return Container(
-                        width: spacePerBar,
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: yPos),
-                          child: Text(
-                            temp.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                }),
+                    return Row(
+                      children:
+                          _averages7Days.entries.map((entry) {
+                            // final index =
+                            // _averages7Days.keys.toList().indexOf(entry.key);
+                            final temp = entry.value;
+                            final yPos =
+                                (1 - temp / (maxTemp + 5)) *
+                                (constraints.maxHeight - 20);
+                            return Container(
+                              width: spacePerBar,
+                              alignment: Alignment.topCenter,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: yPos),
+                                child: Text(
+                                  temp.toStringAsFixed(1),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -199,9 +217,10 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Widget _buildHourlyChart() {
     final barWidth = 12.0;
-    final maxTemp = (_averagesHourly.values.isEmpty)
-        ? 0
-        : _averagesHourly.values.reduce((a, b) => a > b ? a : b);
+    final maxTemp =
+        (_averagesHourly.values.isEmpty)
+            ? 0
+            : _averagesHourly.values.reduce((a, b) => a > b ? a : b);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -216,8 +235,9 @@ class _HistoryPageState extends State<HistoryPage> {
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
-                        if (index < 0 || index >= _averagesHourly.length)
+                        if (index < 0 || index >= _averagesHourly.length) {
                           return SizedBox();
+                        }
                         // Hiện giờ: vd "00h", "01h", ...
                         return Text(
                           '${_averagesHourly.keys.elementAt(index)}h',
@@ -230,25 +250,29 @@ class _HistoryPageState extends State<HistoryPage> {
                     sideTitles: SideTitles(showTitles: false),
                   ),
                   topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
-                barGroups: _averagesHourly.entries
-                    .toList()
-                    .asMap()
-                    .entries
-                    .map((entry) {
-                  final index = entry.key;
-                  final temp = entry.value.value;
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                          toY: temp, color: Colors.green, width: barWidth),
-                    ],
-                  );
-                }).toList(),
+                barGroups:
+                    _averagesHourly.entries.toList().asMap().entries.map((
+                      entry,
+                    ) {
+                      final index = entry.key;
+                      final temp = entry.value.value;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: temp,
+                            color: Colors.green,
+                            width: barWidth,
+                          ),
+                        ],
+                      );
+                    }).toList(),
                 gridData: FlGridData(show: true),
                 borderData: FlBorderData(show: false),
               ),
@@ -256,35 +280,40 @@ class _HistoryPageState extends State<HistoryPage> {
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 20),
-                child: LayoutBuilder(builder: (context, constraints) {
-                  final barCount = _averagesHourly.length;
-                  final spacePerBar = constraints.maxWidth / barCount;
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final barCount = _averagesHourly.length;
+                    final spacePerBar = constraints.maxWidth / barCount;
 
-                  return Row(
-                    children: _averagesHourly.entries.map((entry) {
-                      final index =
-                      _averagesHourly.keys.toList().indexOf(entry.key);
-                      final temp = entry.value;
-                      final yPos = (1 - temp / (maxTemp + 5)) *
-                          (constraints.maxHeight - 20);
-                      return Container(
-                        width: spacePerBar,
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: yPos),
-                          child: Text(
-                            temp.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                }),
+                    return Row(
+                      children:
+                          _averagesHourly.entries.map((entry) {
+                            // final index = _averagesHourly.keys.toList().indexOf(
+                            //   entry.key,
+                            // );
+                            final temp = entry.value;
+                            final yPos =
+                                (1 - temp / (maxTemp + 5)) *
+                                (constraints.maxHeight - 20);
+                            return Container(
+                              width: spacePerBar,
+                              alignment: Alignment.topCenter,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: yPos),
+                                child: Text(
+                                  temp.toStringAsFixed(1),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -300,9 +329,9 @@ class _HistoryPageState extends State<HistoryPage> {
         title: Text(
           'Lịch sử nhiệt độ',
           style: TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
-              fontSize: 20
+            color: Colors.blue,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
         backgroundColor: Colors.blue.shade100,
@@ -322,33 +351,39 @@ class _HistoryPageState extends State<HistoryPage> {
         ],
       ),
 
-      body: _loading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nhiệt độ trung bình 7 ngày qua',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 12),
-            SizedBox(height: 300, child: _build7DaysChart()),
+      body:
+          _loading
+              ? Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nhiệt độ trung bình 7 ngày qua',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    SizedBox(height: 300, child: _build7DaysChart()),
 
-            SizedBox(height: 24),
-            if (_selectedDate != null) ...[
-              Text(
-                'Nhiệt độ trung bình theo khung giờ ngày ${_selectedDate!.toLocal().toString().split(' ')[0]}',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    SizedBox(height: 24),
+                    if (_selectedDate != null) ...[
+                      Text(
+                        'Nhiệt độ trung bình theo khung giờ ngày ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      SizedBox(height: 300, child: _buildHourlyChart()),
+                    ],
+                  ],
+                ),
               ),
-              SizedBox(height: 12),
-              SizedBox(height: 300, child: _buildHourlyChart()),
-            ]
-          ],
-        ),
-      ),
-
     );
   }
 }

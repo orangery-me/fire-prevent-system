@@ -195,10 +195,10 @@ class FirebaseService {
       if (temps != null && temps.isNotEmpty) {
         final avg = temps.reduce((a, b) => a + b) / temps.length;
 
-        print("[$dayKey | $timeRange]: $avg °C");
+        log("[$dayKey | $timeRange]: $avg °C");
         await averagesRef.child(timeRange).set(avg);
       } else {
-        print("[$dayKey | $timeRange]: Không có dữ liệu");
+        log("[$dayKey | $timeRange]: Không có dữ liệu");
       }
     }
   }
